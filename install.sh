@@ -132,6 +132,8 @@ setup_service() {
 setup_nginx() {
   info "configuring nginx..."
 
+  mkdir -p /etc/nginx/conf.d
+
   if ! grep -q "include /etc/nginx/conf.d/\*\.conf" /etc/nginx/nginx.conf; then
     sed -i '/^http {/a\    include /etc/nginx/conf.d/*.conf;' /etc/nginx/nginx.conf
   fi
