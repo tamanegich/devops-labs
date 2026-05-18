@@ -1,0 +1,15 @@
+[Unit]
+Description=Task Tracker Web App
+After=network.target mariadb.service
+Requires=mariadb.service
+
+[Service]
+User=mywebapp
+WorkingDirectory=/opt/mywebapp
+ExecStartPre=/usr/bin/node /opt/mywebapp/migrate.js --db-host localhost --db-port 3306 --db-user taskuser --db-password taskpassword --db-name taskdb
+ExecStart=/usr/bin/node /opt/mywebapp/server.js --port 3000 --db-host localhost --db-port 3306 --db-user taskuser --db-password taskpassword --db-name taskdb
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
