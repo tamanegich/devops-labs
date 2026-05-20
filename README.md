@@ -114,7 +114,7 @@ Request body (JSON): title (string, required).
 
 Після чого клонувати цей репозиторій
 
-`git clone https://github.com/tamanegich/devops-lab1`
+`git clone https://github.com/tamanegich/devops-labs`
 
 Зайти до директорії куди він клонувався
 
