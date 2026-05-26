@@ -1,0 +1,10 @@
+FROM python:3.14-slim-trixie
+
+WORKDIR /app
+
+COPY . .
+
+RUN pip install -r requirements/backend.in
+
+CMD ["python", "spaceship/app.py"]
+
