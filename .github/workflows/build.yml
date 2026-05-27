@@ -3,7 +3,6 @@ name: Build
 on:
     workflow_run:
         workflows:
-            - Lint
             - Test
         types:
             - completed
