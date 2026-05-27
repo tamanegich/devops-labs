@@ -1,42 +1,29 @@
 name: Deploy
 
 on:
-    push:
+    workflow_run:
+        workflows:
+            - Build
+        types:
+            - completed
         tags:
             - "v[0-9]*"
 
 jobs:
-    check-build:
-        name: Verify build passed
-        runs-on: ubuntu-latest
-        steps:
-            - name: Check build workflow conclusion
-              uses: actions/github-script@v8
-              with:
-                  script: |
-                      const runs = await github.rest.actions.listWorkflowRunsForRepo({
-                        owner: context.repo.owner,
-                        repo: context.repo.repo,
-                        head_sha: context.sha,
-                        per_page: 20,
-                      });
-                      const run = runs.data.workflow_runs.find(
-                        r => r.name === 'Build' && r.head_sha === context.sha
-                      );
-                      if (!run) {
-                        core.setFailed('Build workflow not found for this commit');
-                      } else if (run.conclusion !== 'success') {
-                        core.setFailed(`Build workflow did not succeed (status: ${run.conclusion})`);
-                      }
-
     deploy:
         name: Deploy to target node
         runs-on: self-hosted
-        needs: check-build
+        if: github.event.workflow_run.conclusion == 'success'
         environment: production
 
         steps:
             - uses: actions/checkout@v4
+              with:
+                  ref: ${{ github.event.workflow_run.head_sha }}
+
+            - name: Set image tag
+              id: tag
+              run: echo "tag=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
 
             - name: Set up SSH agent
               uses: webfactory/ssh-agent@v0.9.0
@@ -48,14 +35,10 @@ jobs:
               env:
                   TARGET_HOST: ${{ secrets.TARGET_HOST }}
 
-            - name: Set image tag
-              id: tag
-              run: echo "tag=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
-
             - name: Deploy to target node via SSH
               run: |
                   ssh "$TARGET_USER@$TARGET_HOST" \
-                    "IMAGE='ghcr.io/${{ github.repository }}:${{ steps.tag.outputs.tag }}' \
+                    "IMAGE='ghcr.io/${{ github.repository }}:${{ github.event.workflow_run.head_branch }}' \
                      DB_PASSWORD='$DB_PASSWORD' \
                      DB_NAME='$DB_NAME' \
                      DB_USER='$DB_USER' \
