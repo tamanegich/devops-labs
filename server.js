@@ -145,7 +145,7 @@ if (require.main === module) {
         .option("--db-host <host>", "MariaDB host", "localhost")
         .option("--db-port <number>", "MariaDB port", "3306")
         .option("--db-user <user>", "MariaDB user", "taskuser")
-        .option("--db-password <pass>", "MariaDB password", "taskpassword")
+        .option("--db-password <pass>", "MariaDB password", "")
         .option("--db-name <name>", "MariaDB database name", "taskdb")
         .parse(process.argv);
 

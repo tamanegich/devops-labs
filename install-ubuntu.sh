@@ -1,12 +1,16 @@
 #!/bin/bash
 set -e
 
-DB_NAME="taskdb"
-DB_USER="taskuser"
-DB_PASSWORD="taskpassword"
-DB_PORT="3306"
-APP_PORT="3000"
+DB_NAME="${DB_NAME:-taskdb}"
+DB_USER="${DB_USER:-taskuser}"
+: "${DB_PASSWORD:?DB_PASSWORD is required}"
+DB_PORT="${DB_PORT:-3306}"
+APP_PORT="${APP_PORT:-3000}"
 APP_USER="mywebapp"
+
+: "${STUDENT_PASSWORD:?STUDENT_PASSWORD is required}"
+: "${TEACHER_PASSWORD:?TEACHER_PASSWORD is required}"
+: "${OPERATOR_PASSWORD:?OPERATOR_PASSWORD is required}"
 
 info()  { echo -e "\e[32m[INFO]\e[0m  $*"; }
 error() { echo -e "\e[31m[ERROR]\e[0m $*"; exit 1; }
@@ -44,7 +48,7 @@ create_users() {
 
     if ! id student &>/dev/null; then
         useradd -m -G sudo student
-        echo "student:123" | chpasswd
+        echo "student:${STUDENT_PASSWORD}" | chpasswd
         info "created user: student"
     else
         info "user student already exists, skipping."
@@ -52,7 +56,7 @@ create_users() {
 
     if ! id teacher &>/dev/null; then
         useradd -m -G sudo teacher
-        echo "teacher:12345678" | chpasswd
+        echo "teacher:${TEACHER_PASSWORD}" | chpasswd
         chage -d 0 teacher
         info "created user: teacher"
     else
@@ -60,8 +64,8 @@ create_users() {
     fi
 
     if ! id operator &>/dev/null; then
-        useradd -m operator
-        echo "operator:12345678" | chpasswd
+        useradd -m --no-user-group -g operator operator
+        echo "operator:${OPERATOR_PASSWORD}" | chpasswd
         chage -d 0 operator
         info "created user: operator"
     else
@@ -106,7 +110,6 @@ setup_docker() {
     info "configuring Docker..."
     systemctl enable docker
     systemctl start docker
-
     usermod -aG docker "$APP_USER"
     info "Docker configured."
 }
@@ -128,7 +131,6 @@ ExecStartPre=-/usr/bin/docker stop mywebapp
 ExecStartPre=-/usr/bin/docker rm mywebapp
 ExecStart=/usr/bin/docker run --name mywebapp --rm \\
     --network host \\
-    -e "NODE_ENV=production" \\
     ghcr.io/tamanegich/devops-labs:stable \\
     node server.js \\
     --port ${APP_PORT} \\

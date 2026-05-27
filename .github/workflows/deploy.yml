@@ -44,8 +44,7 @@ jobs:
                   ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
             - name: Add target host to known hosts
-              run: |
-                  ssh-keyscan -H "$TARGET_HOST" >> ~/.ssh/known_hosts
+              run: ssh-keyscan -H "$TARGET_HOST" >> ~/.ssh/known_hosts
               env:
                   TARGET_HOST: ${{ secrets.TARGET_HOST }}
 
@@ -56,16 +55,21 @@ jobs:
             - name: Deploy to target node via SSH
               run: |
                   ssh "$TARGET_USER@$TARGET_HOST" \
-                    "IMAGE=ghcr.io/${{ github.repository }}:${{ steps.tag.outputs.tag }} \
+                    "IMAGE='ghcr.io/${{ github.repository }}:${{ steps.tag.outputs.tag }}' \
+                     DB_PASSWORD='$DB_PASSWORD' \
+                     DB_NAME='$DB_NAME' \
+                     DB_USER='$DB_USER' \
                      bash -s" < scripts/deploy.sh
               env:
                   TARGET_USER: ${{ secrets.TARGET_USER }}
                   TARGET_HOST: ${{ secrets.TARGET_HOST }}
+                  DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+                  DB_NAME: ${{ vars.DB_NAME }}
+                  DB_USER: ${{ vars.DB_USER }}
 
             - name: Verify deployment
               run: |
-                  ssh "$TARGET_USER@$TARGET_HOST" \
-                    "bash -s" < scripts/verify.sh
+                  ssh "$TARGET_USER@$TARGET_HOST" "bash -s" < scripts/verify.sh
               env:
                   TARGET_USER: ${{ secrets.TARGET_USER }}
                   TARGET_HOST: ${{ secrets.TARGET_HOST }}

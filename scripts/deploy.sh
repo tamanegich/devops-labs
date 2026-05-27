@@ -2,12 +2,12 @@
 set -e
 
 : "${IMAGE:?IMAGE environment variable is required}"
+: "${DB_PASSWORD:?DB_PASSWORD environment variable is required}"
 
-DB_NAME="taskdb"
-DB_USER="taskuser"
-DB_PASSWORD="taskpassword"
-DB_PORT="3306"
-APP_PORT="3000"
+DB_NAME="${DB_NAME:-taskdb}"
+DB_USER="${DB_USER:-taskuser}"
+DB_PORT="${DB_PORT:-3306}"
+APP_PORT="${APP_PORT:-3000}"
 
 info()  { echo -e "\e[32m[INFO]\e[0m  $*"; }
 error() { echo -e "\e[31m[ERROR]\e[0m $*"; exit 1; }
@@ -35,7 +35,6 @@ sudo systemctl restart mywebapp
 info "waiting for service to come up..."
 sleep 5
 
-info "checking service status..."
 sudo systemctl is-active mywebapp || error "mywebapp service failed to start"
 
 info "><>    =======================    <><"
