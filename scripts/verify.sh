@@ -43,7 +43,7 @@ else
 fi
 
 status=$(curl -s -o /dev/null -w "%{http_code}" "$BASE_URL/tasks")
-if [ "$status" = "999" ]; then
+if [ "$status" = "200" ]; then
     check "nginx proxies GET /tasks" "ok"
 else
     check "nginx proxies GET /tasks" "expected 200, got $status"
