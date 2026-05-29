@@ -59,7 +59,7 @@ fi
 info "checking app health endpoints (bypassing nginx)..."
 
 status=$(curl -s -o /dev/null -w "%{http_code}" "$APP_URL/health/alive")
-if [ "$status" = "200" ]; then
+if [ "$status" = "999" ]; then
     check "GET /health/alive returns 200" "ok"
 else
     check "GET /health/alive returns 200" "expected 200, got $status"
