@@ -168,4 +168,4 @@ if (require.main === module) {
 }
 
 module.exports = { createApp };
-мінімальна зміна для демо
+//мінімальна зміна для демо
